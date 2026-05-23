@@ -10,7 +10,6 @@ export default function NewItinerary() {
   const navigate = useNavigate();
 
   const [files, setFiles] = useState([]);
-  const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -30,7 +29,6 @@ export default function NewItinerary() {
     setLoading(true);
     const fd = new FormData();
     files.forEach((f) => fd.append("files", f));
-    if (notes.trim()) fd.append("notes", notes.trim());
 
     try {
       const { data } = await api.post("/itineraries", fd, {
@@ -49,9 +47,6 @@ export default function NewItinerary() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
       <div className="mb-6 animate-fade-in-up">
-        <span className="chip-accent mb-3">
-          <Sparkles size={12} /> New trip
-        </span>
         <h1 className="text-2xl font-bold text-ink-900 sm:text-3xl">New itinerary</h1>
         <p className="mt-1 text-sm text-ink-700">
           Upload your flight, hotel and ticket documents. We'll do the rest.
@@ -61,20 +56,6 @@ export default function NewItinerary() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="surface p-5 sm:p-6 animate-fade-in-up">
           <FileDropzone files={files} setFiles={setFiles} disabled={loading} />
-        </div>
-
-        <div className="surface p-5 sm:p-6 animate-fade-in-up">
-          <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-ink-500">
-            Notes for the AI (optional)
-          </label>
-          <textarea
-            rows={4}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            disabled={loading}
-            placeholder="E.g. vegetarian restaurants, traveling with 2 kids, prefer mornings free..."
-            className="input resize-none"
-          />
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

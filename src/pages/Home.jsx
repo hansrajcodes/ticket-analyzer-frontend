@@ -21,9 +21,6 @@ export default function Home() {
       <section className="relative overflow-hidden bg-hero-glow">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24 lg:py-32">
           <div className="mx-auto max-w-3xl text-center animate-fade-in-up">
-            <span className="chip-accent mx-auto mb-5 shadow-soft">
-              <Sparkles size={14} /> AI-powered itineraries
-            </span>
             <h1 className="text-4xl font-bold tracking-tight text-ink-900 sm:text-5xl lg:text-6xl">
               Drop in your bookings.{" "}
               <span className="bg-brand-gradient bg-clip-text text-transparent">

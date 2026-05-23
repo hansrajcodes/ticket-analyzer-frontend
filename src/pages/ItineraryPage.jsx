@@ -121,7 +121,8 @@ export default function ItineraryPage() {
         <button
           onClick={handleToggleShare}
           disabled={busy}
-          className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold transition-colors sm:flex-none ${
+          title={itinerary.isPublic ? "Click to make private" : "Click to make public and share"}
+          className={`inline-flex items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold transition-colors ${
             itinerary.isPublic
               ? "bg-primary-50 text-primary-700 hover:bg-primary-100"
               : "bg-ink-100 text-ink-700 hover:bg-ink-200"
@@ -130,6 +131,12 @@ export default function ItineraryPage() {
           {itinerary.isPublic ? <Globe2 size={16} /> : <Lock size={16} />}
           {itinerary.isPublic ? "Public" : "Private"}
         </button>
+
+        {!itinerary.isPublic && (
+          <span className="hidden text-xs text-ink-500 sm:inline">
+            Click to make public and share
+          </span>
+        )}
 
         {itinerary.isPublic && (
           <>
