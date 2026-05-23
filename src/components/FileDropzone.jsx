@@ -1,5 +1,9 @@
 import { useDropzone } from "react-dropzone";
-import { FileText, Image as ImageIcon, UploadCloud, X } from "lucide-react";
+import { FileText, Image as ImageIcon, Info, UploadCloud, X } from "lucide-react";
+import toast from "react-hot-toast";
+
+export const MAX_FILE_BYTES = 4 * 1024 * 1024;        // per file
+export const MAX_TOTAL_BYTES = 4.5 * 1024 * 1024;     // combined request body
 
 const formatSize = (bytes) => {
   if (bytes < 1024) return `${bytes} B`;
@@ -8,19 +12,48 @@ const formatSize = (bytes) => {
 };
 
 export default function FileDropzone({ files, setFiles, disabled }) {
+  const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
+
   const onDrop = (accepted) => {
     setFiles((prev) => {
       const next = [...prev];
+      let running = next.reduce((s, f) => s + f.size, 0);
+      const skipped = [];
       for (const f of accepted) {
         const dup = next.find((x) => x.name === f.name && x.size === f.size);
-        if (!dup) next.push(f);
+        if (dup) continue;
+        if (running + f.size > MAX_TOTAL_BYTES) {
+          skipped.push(f.name);
+          continue;
+        }
+        next.push(f);
+        running += f.size;
+      }
+      if (skipped.length) {
+        toast.error(
+          `Total upload limit is 4.5 MB (Vercel free tier). Skipped: ${skipped.join(", ")}`
+        );
       }
       return next.slice(0, 8);
     });
   };
 
+  const onDropRejected = (rejections) => {
+    const tooBig = rejections.filter((r) =>
+      r.errors.some((e) => e.code === "file-too-large")
+    );
+    if (tooBig.length) {
+      toast.error(
+        `Each file must be 4 MB or smaller (Vercel free tier limit). Rejected: ${tooBig
+          .map((r) => r.file.name)
+          .join(", ")}`
+      );
+    }
+  };
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
+    onDropRejected,
     disabled,
     accept: {
       "application/pdf": [".pdf"],
@@ -28,7 +61,7 @@ export default function FileDropzone({ files, setFiles, disabled }) {
       "image/png": [".png"],
       "image/webp": [".webp"],
     },
-    maxSize: 10 * 1024 * 1024,
+    maxSize: MAX_FILE_BYTES,
     maxFiles: 8,
   });
 
@@ -50,7 +83,18 @@ export default function FileDropzone({ files, setFiles, disabled }) {
           {isDragActive ? "Drop the files here" : "Drag & drop booking documents"}
         </p>
         <p className="mt-1 text-xs text-ink-500">
-          or click to choose — PDF, JPG, PNG, WEBP — up to 10&nbsp;MB each (max 8)
+          or click to choose — PDF, JPG, PNG, WEBP — up to 4&nbsp;MB per file (max 8)
+        </p>
+      </div>
+
+      <div className="mt-3 flex items-start gap-2 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-900 ring-1 ring-amber-200">
+        <Info size={14} className="mt-0.5 shrink-0 text-amber-600" />
+        <p>
+          Vercel free tier caps the total upload request at <strong>4.5&nbsp;MB</strong>.
+          Keep your combined file size under that limit.
+          <span className="ml-1 font-medium">
+            Selected: {formatSize(totalBytes)} / 4.5&nbsp;MB
+          </span>
         </p>
       </div>
 

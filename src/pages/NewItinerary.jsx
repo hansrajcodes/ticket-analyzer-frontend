@@ -4,7 +4,7 @@ import { Loader2, Sparkles, ShieldCheck } from "lucide-react";
 import toast from "react-hot-toast";
 
 import api from "../api/axios";
-import FileDropzone from "../components/FileDropzone";
+import FileDropzone, { MAX_TOTAL_BYTES } from "../components/FileDropzone";
 
 export default function NewItinerary() {
   const navigate = useNavigate();
@@ -17,6 +17,13 @@ export default function NewItinerary() {
     e.preventDefault();
     if (files.length === 0) {
       toast.error("Please add at least one document");
+      return;
+    }
+    const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
+    if (totalBytes > MAX_TOTAL_BYTES) {
+      toast.error(
+        "Combined upload exceeds 4.5 MB — Vercel's free tier limit. Remove some files."
+      );
       return;
     }
 
